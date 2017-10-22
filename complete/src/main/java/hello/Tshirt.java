@@ -13,7 +13,7 @@ import java.util.Collection;
 public class Tshirt {
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
-    private Integer id;
+    private Long id;
 
     private String size;
 
@@ -24,11 +24,11 @@ public class Tshirt {
     @OneToMany(mappedBy = "tshirt", targetEntity = TshirtOrder.class, fetch = FetchType.LAZY)
     private Collection orders;
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

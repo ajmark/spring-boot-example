@@ -1,6 +1,5 @@
 package hello;
 
-import hello.services.TshirtOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -8,10 +7,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 
 @Controller    // This means that this class is a Controller
 @RequestMapping(path="/demo") // This means URL's start with /demo (after Application path)
@@ -85,20 +80,35 @@ public class MainController {
 
 		try {
 
-			EntityManagerFactory emf = Persistence.createEntityManagerFactory("TshirtOrderService");
-			EntityManager em = emf.createEntityManager();
+			Tshirt tshirt = tshirtRepository.findOne(tshirtId);
+			if (tshirt != null) {
+				if (tshirt.getCount() > 0) {
 
-			TshirtOrderService service = new TshirtOrderService(em);
+					TshirtOrder order = new TshirtOrder();
+					order.setTshirt(tshirt);
+					order.setEmail(email);
+					order.setName(name);
+					order.setAddress1(address1);
+					order.setAddress2(address2);
+					order.setCity(city);
+					order.setStateOrProvince(stateOrProvince);
+					order.setPostalCode(postalCode);
+					order.setCountry(country);
+					orderRepository.save(order);
 
-			TshirtOrder order = service.createTshirtOrder(tshirtId, email, name, address1, address2, city,
-					stateOrProvince,postalCode, country);
+					//saves the order and reduces the inventory count of the type of tshirt
+					tshirt.setCount(tshirt.getCount()-1);
+					tshirtRepository.save(tshirt);
 
-			if (order != null) {
-				return order;
+					return order;
+				} else {
+					return "Unable to place order! Tshirt out of stock.";
+				}
 			}
 		} catch (Exception e) {
 			return e;
 		}
-			return "Unable to place order!";
-		};
+
+		return "Unable to place order!";
 	}
+}
