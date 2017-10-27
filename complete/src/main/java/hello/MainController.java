@@ -1,6 +1,7 @@
 package hello;
 
 import hello.Util.OutOfStockException;
+import hello.Util.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -10,6 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.Collection;
 
 @Controller    // This means that this class is a Controller
 @RequestMapping(path="/demo") // This means URL's start with /demo (after Application path)
@@ -58,6 +61,12 @@ public class MainController {
 		return customer;
 	}
 
+	@GetMapping(path="/customer/{id}/orders")
+	public @ResponseBody Object getOrdersByCustomer(@PathVariable(value = "id") Long id) {
+		Collection<TshirtOrder> orders = orderRepository.findByCustomerId(id);
+		return orders;
+	}
+
 	@GetMapping(path="/tshirts")
 	public @ResponseBody Iterable<Tshirt> getAllTshirts() {
 		return tshirtRepository.findAll();
@@ -73,13 +82,15 @@ public class MainController {
 			@RequestParam Long id,
 			@RequestParam String size,
 			@RequestParam String description,
-			@RequestParam Integer count
+			@RequestParam Integer count,
+			@RequestParam String sku
 	) {
 
 		Tshirt tshirt = tshirtRepository.findOne(id);
 		tshirt.setSize(size);
 		tshirt.setDescription(description);
 		tshirt.setCount(count);
+		tshirt.setSku(sku);
 		tshirtRepository.save(tshirt);
 
 		return tshirt;
@@ -89,13 +100,16 @@ public class MainController {
 	public @ResponseBody Object addTshirt (
 			@RequestParam String size,
 			@RequestParam String description,
-			@RequestParam Integer count) {
+			@RequestParam Integer count,
+			@RequestParam String sku
+	) {
 
 		Tshirt tshirt = new Tshirt();
 
 		tshirt.setSize(size);
 		tshirt.setDescription(description);
 		tshirt.setCount(count);
+		tshirt.setSku(sku);
 		tshirtRepository.save(tshirt);
 
 		return tshirt;
@@ -122,28 +136,29 @@ public class MainController {
 	public @ResponseBody Object editOrder(
 			@RequestParam Long orderId,
 			@RequestParam Long tshirtId,
-			@RequestParam String email,
-			@RequestParam String name,
+			@RequestParam Long customerId,
 			@RequestParam String address1,
 			@RequestParam String address2,
 			@RequestParam String city,
 			@RequestParam String stateOrProvince,
 			@RequestParam String postalCode,
-			@RequestParam String country
+			@RequestParam String country,
+			@RequestParam String status
 	) {
 
 		TshirtOrder order = orderRepository.findOne(orderId);
 		Tshirt tshirt = tshirtRepository.findOne(tshirtId);
+		Customer customer = customerRepository.findOne(customerId);
 
 		order.setTshirt(tshirt);
-		order.setEmail(email);
-		order.setName(name);
+		order.setCustomer(customer);
 		order.setAddress1(address1);
 		order.setAddress2(address2);
 		order.setCity(city);
 		order.setStateOrProvince(stateOrProvince);
 		order.setPostalCode(postalCode);
 		order.setCountry(country);
+		order.setStatus(status);
 		orderRepository.save(order);
 
 		return order;
@@ -152,31 +167,32 @@ public class MainController {
 	@PostMapping(path="/createOrder")
 	public @ResponseBody Object createOrder (
 			@RequestParam Long tshirtId,
-			@RequestParam String email,
-			@RequestParam String name,
+			@RequestParam Long customerId,
 			@RequestParam String address1,
 			@RequestParam String address2,
 			@RequestParam String city,
 			@RequestParam String stateOrProvince,
 			@RequestParam String postalCode,
-			@RequestParam String country ) throws OutOfStockException {
+			@RequestParam String country,
+			@RequestParam String status ) throws OutOfStockException {
 
 		try {
 
 			Tshirt tshirt = tshirtRepository.findOne(tshirtId);
-			if (tshirt != null) {
+			Customer customer = customerRepository.findOne(customerId);
+			if (tshirt != null && customer != null) {
 				if (tshirt.getCount() > 0) {
 
 					TshirtOrder order = new TshirtOrder();
 					order.setTshirt(tshirt);
-					order.setEmail(email);
-					order.setName(name);
+					order.setCustomer(customer);
 					order.setAddress1(address1);
 					order.setAddress2(address2);
 					order.setCity(city);
 					order.setStateOrProvince(stateOrProvince);
 					order.setPostalCode(postalCode);
 					order.setCountry(country);
+					order.setStatus(status);
 					orderRepository.save(order);
 
 					//saves the order and reduces the inventory count of the type of tshirt
@@ -200,5 +216,16 @@ public class MainController {
 		TshirtOrder order = orderRepository.findOne(id);
 		orderRepository.delete(order);
 		return order;
+	}
+
+	@GetMapping(path="/order/{id}/orderStatus")
+	public @ResponseBody Object getOrderStatus(@PathVariable(value = "id") Long id) {
+		TshirtOrder order = orderRepository.findOne(id);
+
+		if (order != null) {
+			return new Response ("BL-100", order.getId().toString(), order.getStatus());
+		} else {
+			return new Response ("BL-101", null, "Unable to find order!");
+		}
 	}
 }

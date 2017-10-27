@@ -21,8 +21,10 @@ public class Tshirt {
 
     private Integer count;
 
-    @OneToMany(mappedBy = "tshirt", targetEntity = TshirtOrder.class, fetch = FetchType.LAZY)
-    private Collection orders;
+    private String sku;
+
+//    @OneToMany(mappedBy = "tshirt", targetEntity = TshirtOrder.class, fetch = FetchType.LAZY)
+//    private Collection orders;
 
     public Long getId() {
         return id;
@@ -55,4 +57,16 @@ public class Tshirt {
     public void setCount(Integer count) {
         this.count = count;
     }
+
+    public String getSku() {
+        return sku;
+    }
+
+    public void setSku(String sku) {
+        this.sku = sku;
+    }
+
+//    public Collection<TshirtOrder> getOrders() {
+//        return orders;
+//    }
 }

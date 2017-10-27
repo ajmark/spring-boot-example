@@ -13,10 +13,6 @@ public class TshirtOrder {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private String email;
-
-    private String name;
-
     private String address1;
 
     private String address2;
@@ -29,9 +25,15 @@ public class TshirtOrder {
 
     private String country;
 
+    private String status;
+
     @ManyToOne(optional=false)
     @JoinColumn(referencedColumnName = "id")
     private Tshirt tshirt;
+
+    @ManyToOne(optional=false)
+    @JoinColumn(referencedColumnName = "id")
+    private Customer customer;
 
     public Long getId() {
         return id;
@@ -39,22 +41,6 @@ public class TshirtOrder {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getAddress1() {
@@ -105,11 +91,27 @@ public class TshirtOrder {
         this.country = country;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     public void setTshirt(Tshirt tshirt) {
         this.tshirt = tshirt;
     }
 
     public Tshirt getTshirt() {
         return tshirt;
+    }
+
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
+    }
+
+    public Customer getCustomer() {
+        return customer;
     }
 }

@@ -1,9 +1,12 @@
 package hello;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import java.util.Collection;
 
 @Entity // This tells Hibernate to make a table out of this class
 public class Customer {
@@ -16,6 +19,9 @@ public class Customer {
     private String lastName;
 
     private String email;
+
+//	@OneToMany(mappedBy = "customer", targetEntity = TshirtOrder.class, fetch = FetchType.LAZY)
+//	private Collection orders;
 
 	public Long getId() {
 		return id;
@@ -49,6 +55,8 @@ public class Customer {
 		this.email = email;
 	}
     
-    
+//    public Collection<TshirtOrder> getOrders() {
+//		return orders;
+//	}
 }
 
