@@ -3,7 +3,9 @@ package hello;
 import hello.Util.OutOfStockException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -43,9 +45,44 @@ public class MainController {
 		return customerRepository.findAll();
 	}
 
+	@GetMapping(path="/customer/{id}")
+	public @ResponseBody Object getCustomerById(@PathVariable(value = "id") Long id) {
+		Customer customer = customerRepository.findOne(id);
+		return customer;
+	}
+
+	@DeleteMapping(path="/delete/customer/{id}")
+	public @ResponseBody Object deleteCustomer(@PathVariable(value = "id") Long id){
+		Customer customer = customerRepository.findOne(id);
+		customerRepository.delete(customer);
+		return customer;
+	}
+
 	@GetMapping(path="/tshirts")
 	public @ResponseBody Iterable<Tshirt> getAllTshirts() {
 		return tshirtRepository.findAll();
+	}
+
+	@GetMapping(path="/tshirt/{id}")
+	public @ResponseBody Object getTshirtById(@PathVariable(value = "id") Long id) {
+		return tshirtRepository.findOne(id);
+	}
+
+	@PostMapping(path="/inventory/editTshirt")
+	public @ResponseBody Object editTshirt(
+			@RequestParam Long id,
+			@RequestParam String size,
+			@RequestParam String description,
+			@RequestParam Integer count
+	) {
+
+		Tshirt tshirt = tshirtRepository.findOne(id);
+		tshirt.setSize(size);
+		tshirt.setDescription(description);
+		tshirt.setCount(count);
+		tshirtRepository.save(tshirt);
+
+		return tshirt;
 	}
 
 	@PostMapping(path="/addTshirt")
@@ -64,9 +101,52 @@ public class MainController {
 		return tshirt;
 	}
 
+	@DeleteMapping(path="/delete/tshirt/{id}")
+	public @ResponseBody Object deleteTshirt(@PathVariable(value = "id") Long id){
+		Tshirt tshirt = tshirtRepository.findOne(id);
+		tshirtRepository.delete(tshirt);
+		return tshirt;
+	}
+
 	@GetMapping(path="/orders")
 	public @ResponseBody Iterable<TshirtOrder> getAllOrders() {
 		return orderRepository.findAll();
+	}
+
+	@GetMapping(path="/order/{id}")
+	public @ResponseBody Object getOrderById(@PathVariable(value = "id") Long id) {
+		return orderRepository.findOne(id);
+	}
+
+	@PostMapping(path="order/editOrder")
+	public @ResponseBody Object editOrder(
+			@RequestParam Long orderId,
+			@RequestParam Long tshirtId,
+			@RequestParam String email,
+			@RequestParam String name,
+			@RequestParam String address1,
+			@RequestParam String address2,
+			@RequestParam String city,
+			@RequestParam String stateOrProvince,
+			@RequestParam String postalCode,
+			@RequestParam String country
+	) {
+
+		TshirtOrder order = orderRepository.findOne(orderId);
+		Tshirt tshirt = tshirtRepository.findOne(tshirtId);
+
+		order.setTshirt(tshirt);
+		order.setEmail(email);
+		order.setName(name);
+		order.setAddress1(address1);
+		order.setAddress2(address2);
+		order.setCity(city);
+		order.setStateOrProvince(stateOrProvince);
+		order.setPostalCode(postalCode);
+		order.setCountry(country);
+		orderRepository.save(order);
+
+		return order;
 	}
 
 	@PostMapping(path="/createOrder")
@@ -113,5 +193,12 @@ public class MainController {
 		}
 
 		return "Unable to place order!";
+	}
+
+	@DeleteMapping(path="/delete/order/{id}")
+	public @ResponseBody Object deleteOrder(@PathVariable(value = "id") Long id){
+		TshirtOrder order = orderRepository.findOne(id);
+		orderRepository.delete(order);
+		return order;
 	}
 }
